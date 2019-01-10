@@ -25,7 +25,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     mySetpoint = Setpoint;
     inAuto = false;
 
-    PID::SetOutputLimits(0, 255);				//default output limit corresponds to
+    PID::SetOutputLimits(0, 255, 0, 255);				//default output limit corresponds to
 												//the arduino pwm limits
 
     SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
@@ -71,8 +71,8 @@ bool PID::Compute()
       /*Add Proportional on Measurement, if P_ON_M is specified*/
       if(!pOnE) outputSum-= kp * dInput;
 
-      if(outputSum > outMax) outputSum= outMax;
-      else if(outputSum < outMin) outputSum= outMin;
+      if(outputSum > kiMax) outputSum= kiMax;
+      else if(outputSum < kiMin) outputSum= kiMin;
 
       /*Add Proportional on Error, if P_ON_E is specified*/
 	   double output;
@@ -151,11 +151,13 @@ void PID::SetSampleTime(int NewSampleTime)
  *  want to clamp it from 0-125.  who knows.  at any rate, that can all be done
  *  here.
  **************************************************************************/
-void PID::SetOutputLimits(double Min, double Max)
+void PID::SetOutputLimits(double Min, double Max, double IMin, double IMax)
 {
    if(Min >= Max) return;
    outMin = Min;
    outMax = Max;
+   kiMax = IMax;
+   kiMin = IMin;
 
    if(inAuto)
    {
